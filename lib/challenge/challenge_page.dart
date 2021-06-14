@@ -15,6 +15,24 @@ class ChallegePage extends StatefulWidget {
 
 class _ChallegePageState extends State<ChallegePage> {
   final controller = ChallengeController();
+  final pageController = PageController();
+
+  void nextPage(){
+    if (controller.currentPage < widget.questions.length)
+      pageController.nextPage(
+        duration: Duration(milliseconds: 100),
+        curve: Curves.linear
+      );
+  }
+
+  @override
+  void initState() { 
+    super.initState();
+    pageController.addListener(() {
+      controller.currentPage = pageController.page!.toInt() + 1;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,22 +47,39 @@ class _ChallegePageState extends State<ChallegePage> {
               icon: Icon(Icons.close),
               onPressed: () => Navigator.pop(context),
             ),
-            QuestionIndicatorWidget(),
+            ValueListenableBuilder<int>(
+              valueListenable: controller.currentPageNotifier,
+              builder: (context, value, _) => QuestionIndicatorWidget(
+              currentPage: value,
+              length: widget.questions.length,
+            ),
+            )
           ],
         ))
       ),
-      body: QuizWidget(question: widget.questions[0]),
+      body: PageView(
+        physics: NeverScrollableScrollPhysics(),
+        controller: pageController,
+        children: widget.questions.map((e) => QuizWidget(
+          question: e,
+          onChange: nextPage
+        )).toList()
+      ),
       bottomNavigationBar: SafeArea(
         bottom: true,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Expanded(child: NextButtonWidget.white(label: "Fácil", onTap: (){})),
-              SizedBox(width: 7),
-              Expanded(child: NextButtonWidget.green(label: "Confirmar", onTap: (){}))
-            ],
+          child: ValueListenableBuilder<int>(
+            valueListenable: controller.currentPageNotifier,
+            builder: (context, value, _) => Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                if (value < widget.questions.length)
+                Expanded(child: NextButtonWidget.white(label: "Pular", onTap: nextPage)),
+                if (value == widget.questions.length)
+                  Expanded(child: NextButtonWidget.green(label: "Confirmar", onTap: (){}))
+              ],
+            )
           ),
         ),
       ),

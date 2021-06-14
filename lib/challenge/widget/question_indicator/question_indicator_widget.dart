@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 
 class QuestionIndicatorWidget extends StatelessWidget {
   final int currentPage;
-  final int size;
-  const QuestionIndicatorWidget({Key? key, required this.currentPage, required this.size}) : super(key: key);
+  final int length;
+  const QuestionIndicatorWidget({Key? key, required this.currentPage, required this.length}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -17,11 +17,11 @@ class QuestionIndicatorWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("Questão $currentPage", style: AppTextStyles.body),
-              Text("de $size", style: AppTextStyles.body)
+              Text("de $length", style: AppTextStyles.body)
             ],
           ),
           SizedBox(height: 16),
-          ProgressIndicatorWidget(value: 0.7)
+          ProgressIndicatorWidget(value: currentPage / length)
         ],
       )
     );
